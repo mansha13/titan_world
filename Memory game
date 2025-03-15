@@ -1,0 +1,125 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <h1>Memory Game</h1>
+    <div class="game-container">
+        <div class="game-board" id="gameBoard"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+ * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    text-align: center;
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+.game-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(4, 100px);
+    grid-template-rows: repeat(4, 100px);
+    gap: 10px;
+}
+
+.card {
+    width: 100px;
+    height: 100px;
+    background-color: #3498db;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    border-radius: 10px;
+    user-select: none;
+}
+
+.card.matched {
+    background-color: #2ecc71;
+    cursor: default;
+}
+ document.addEventListener("DOMContentLoaded", () => {
+    const gameBoard = document.getElementById("gameBoard");
+    const emojis = ["🍎", "🍌", "🍒", "🍇", "🍉", "🥝", "🍓", "🍍"];
+    let cardArray = [...emojis, ...emojis]; // Duplicate for pairs
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+
+    // Shuffle function
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
+    }
+
+    cardArray = shuffle(cardArray);
+
+    // Create cards
+    cardArray.forEach((emoji) => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.dataset.emoji = emoji;
+        card.innerHTML = "❓"; // Hidden state
+        card.addEventListener("click", flipCard);
+        gameBoard.appendChild(card);
+    });
+
+    // Flip card function
+    function flipCard() {
+        if (lockBoard || this === firstCard) return;
+
+        this.innerHTML = this.dataset.emoji;
+
+        if (!firstCard) {
+            firstCard = this;
+            return;
+        }
+
+        secondCard = this;
+        checkForMatch();
+    }
+
+    // Check for match
+    function checkForMatch() {
+        lockBoard = true;
+
+        if (firstCard.dataset.emoji === secondCard.dataset.emoji) {
+            firstCard.classList.add("matched");
+            secondCard.classList.add("matched");
+            resetTurn();
+        } else {
+            setTimeout(() => {
+                firstCard.innerHTML = "❓";
+                secondCard.innerHTML = "❓";
+                resetTurn();
+            }, 1000);
+        }
+    }
+
+    // Reset turn
+    function resetTurn() {
+        [firstCard, secondCard] = [null, null];
+        lockBoard = false;
+    }
+});
